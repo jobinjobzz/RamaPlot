@@ -174,7 +174,7 @@ pyinstaller  # build only
 
 ## 📄 License
 
-MIT License — free to use, modify, and distribute.
+Free to use, modify, and distribute.
 
 ---
 
