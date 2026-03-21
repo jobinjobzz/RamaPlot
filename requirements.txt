@@ -1,0 +1,9 @@
+flask==3.1.0
+biopython==1.84
+matplotlib==3.9.0
+numpy==1.26.4
+scipy==1.13.0
+requests==2.32.3
+reportlab==4.2.2
+pillow==10.4.0
+pyinstaller==6.10.0
