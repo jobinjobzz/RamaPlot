@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="RamaPlot — Free standalone desktop tool for Ramachandran plot analysis, ERRAT, bond geometry, clash score and B-factor validation of protein structures."/>
+  <title>RamaPlot — Ramachandran Plot Analyzer</title>
+  <link rel="icon" type="image/svg+xml" href="ramaplot-icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--ink:#0d1117;--ink2:#3d4a5c;--ink3:#7a8a9e;--paper:#f9fafb;--white:#ffffff;--blue:#2d6be4;--blue-light:#e8f0fd;--blue-mid:#b8cef8;--teal:#1a9b8a;--border:#e4e8ef;--shadow:0 4px 24px rgba(13,17,23,0.08);--shadow-lg:0 16px 64px rgba(13,17,23,0.12)}
+    html{scroll-behavior:smooth}
+    body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--ink);overflow-x:hidden;line-height:1.6}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:64px;background:rgba(255,255,255,0.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+    .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
+    .nav-logo-text{font-family:'DM Serif Display',serif;font-size:1.25rem;letter-spacing:-0.3px}
+    .nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+    .nav-links a{text-decoration:none;color:var(--ink2);font-size:0.9rem;font-weight:500;transition:color 0.2s}
+    .nav-links a:hover{color:var(--blue)}
+    .nav-cta{padding:8px 20px;background:var(--blue);color:white!important;border-radius:8px;font-weight:600!important;font-size:0.875rem!important;transition:all 0.2s!important;box-shadow:0 2px 8px rgba(45,107,228,0.3)}
+    .nav-cta:hover{background:#1d57cc!important;transform:translateY(-1px)}
+    @media(max-width:640px){.nav-links{display:none}}
+    .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8rem 1.5rem 4rem;position:relative;overflow:hidden;background:var(--white)}
+    .hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:48px 48px;opacity:0.5;mask-image:radial-gradient(ellipse 80% 60% at 50% 40%,black 30%,transparent 100%)}
+    .hero-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.22;animation:drift 12s ease-in-out infinite alternate}
+    .hero-orb-1{width:500px;height:500px;background:radial-gradient(circle,#2d6be4,#1a9b8a);top:-100px;left:-100px}
+    .hero-orb-2{width:400px;height:400px;background:radial-gradient(circle,#6b9fe4,#2d6be4);bottom:-80px;right:-80px;animation-delay:-6s}
+    @keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(30px,20px) scale(1.08)}}
+    .hero-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;background:var(--blue-light);border:1px solid var(--blue-mid);border-radius:999px;font-size:0.78rem;font-weight:600;color:var(--blue);letter-spacing:0.4px;margin-bottom:1.5rem;animation:fadeUp 0.6s ease both}
+    .hero-badge-dot{width:6px;height:6px;background:var(--blue);border-radius:50%;animation:pulse 2s ease infinite}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+    .hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2.6rem,6vw,4.2rem);line-height:1.12;letter-spacing:-1.5px;color:var(--ink);max-width:760px;margin-bottom:1.2rem;animation:fadeUp 0.6s 0.1s ease both}
+    .hero h1 em{font-style:italic;color:var(--blue)}
+    .hero-sub{font-size:1.1rem;color:var(--ink2);max-width:580px;margin-bottom:2.4rem;line-height:1.7;animation:fadeUp 0.6s 0.2s ease both}
+    .hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:4rem;animation:fadeUp 0.6s 0.3s ease both}
+    .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:13px 28px;background:var(--blue);color:white;border-radius:10px;font-size:0.95rem;font-weight:600;text-decoration:none;transition:all 0.2s;box-shadow:0 4px 16px rgba(45,107,228,0.35)}
+    .btn-primary:hover{background:#1d57cc;transform:translateY(-2px);box-shadow:0 8px 24px rgba(45,107,228,0.45)}
+    .btn-secondary{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;background:white;color:var(--ink);border:1.5px solid var(--border);border-radius:10px;font-size:0.95rem;font-weight:500;text-decoration:none;transition:all 0.2s}
+    .btn-secondary:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-1px)}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .hero-mockup{position:relative;width:100%;max-width:860px;animation:fadeUp 0.8s 0.4s ease both}
+    .mockup-browser{background:white;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-lg),0 0 0 1px rgba(0,0,0,0.04);overflow:hidden}
+    .mockup-bar{background:#f4f5f7;padding:10px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+    .mockup-dot{width:10px;height:10px;border-radius:50%}
+    .mockup-dot:nth-child(1){background:#ff5f57}.mockup-dot:nth-child(2){background:#febc2e}.mockup-dot:nth-child(3){background:#28c840}
+    .mockup-url{flex:1;background:white;border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--ink3);margin-left:8px}
+    .mockup-content{background:#f9fafb;min-height:380px;display:flex;align-items:center;justify-content:center}
+    .plot-preview{width:100%;padding:1.5rem}
+    .stats-bar{background:var(--ink);padding:2rem 1.5rem}
+    .stats-inner{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:2rem;text-align:center}
+    .stat-num{font-family:'DM Serif Display',serif;font-size:2.2rem;color:white;letter-spacing:-1px}
+    .stat-num span{color:#6b9fe4}
+    .stat-desc{font-size:0.82rem;color:#8899aa;font-weight:500;margin-top:2px;text-transform:uppercase;letter-spacing:0.5px}
+    section{padding:5rem 1.5rem}
+    .section-inner{max-width:1000px;margin:0 auto}
+    .section-label{display:inline-block;font-size:0.75rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--blue);margin-bottom:0.75rem}
+    .section-title{font-family:'DM Serif Display',serif;font-size:clamp(1.8rem,3.5vw,2.6rem);letter-spacing:-0.8px;line-height:1.18;color:var(--ink);margin-bottom:1rem}
+    .section-body{font-size:1rem;color:var(--ink2);max-width:620px;line-height:1.75}
+    .how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem;margin-top:3rem}
+    .how-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:2rem;position:relative;transition:all 0.3s;overflow:hidden}
+    .how-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--teal));transform:scaleX(0);transform-origin:left;transition:transform 0.3s}
+    .how-card:hover{box-shadow:var(--shadow);transform:translateY(-3px)}
+    .how-card:hover::before{transform:scaleX(1)}
+    .how-num{width:36px;height:36px;background:var(--blue-light);color:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:1.1rem;font-weight:700;margin-bottom:1rem}
+    .how-icon{font-size:1.6rem;margin-bottom:0.75rem}
+    .how-title{font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:0.4rem}
+    .how-desc{font-size:0.875rem;color:var(--ink2);line-height:1.65}
+    .features-section{background:var(--paper)}
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem;margin-top:3rem}
+    .feature-card{background:white;border:1px solid var(--border);border-radius:14px;padding:1.75rem;transition:all 0.25s}
+    .feature-card:hover{box-shadow:var(--shadow);transform:translateY(-2px)}
+    .feature-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:1rem}
+    .fi-blue{background:#e8f0fd}.fi-teal{background:#e0f5f2}.fi-amber{background:#fdf3e0}.fi-rose{background:#fde8e8}.fi-purple{background:#f0eafd}.fi-green{background:#e6f8f0}.fi-indigo{background:#eef0fd}.fi-orange{background:#fdf0e6}
+    .feature-title{font-size:0.95rem;font-weight:700;color:var(--ink);margin-bottom:0.4rem}
+    .feature-desc{font-size:0.84rem;color:var(--ink2);line-height:1.65}
+    .science-section{background:var(--white)}
+    .science-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start;margin-top:3rem}
+    @media(max-width:720px){.science-grid{grid-template-columns:1fr}}
+    .science-text h3{font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--ink);margin-bottom:0.75rem;letter-spacing:-0.3px}
+    .science-text p{font-size:0.9rem;color:var(--ink2);line-height:1.75;margin-bottom:1rem}
+    .cite{font-size:0.78rem;color:var(--ink3);border-left:2px solid var(--border);padding-left:0.75rem;margin-top:0.75rem;font-style:italic}
+    .analyses-section{background:var(--paper)}
+    .analyses-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.25rem;margin-top:2.5rem}
+    .analysis-card{background:white;border:1px solid var(--border);border-radius:14px;padding:1.5rem;transition:all 0.25s}
+    .analysis-card:hover{box-shadow:var(--shadow);transform:translateY(-2px)}
+    .analysis-card-header{display:flex;align-items:center;gap:12px;margin-bottom:0.75rem}
+    .analysis-num{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;flex-shrink:0}
+    .an-blue{background:#e8f0fd;color:#1d57cc}.an-teal{background:#e0f5f2;color:#0f6e56}.an-amber{background:#fdf3e0;color:#92400e}.an-purple{background:#f0eafd;color:#5b21b6}.an-rose{background:#fde8e8;color:#9b1c1c}
+    .analysis-card-title{font-size:1rem;font-weight:700;color:var(--ink)}
+    .analysis-card-sub{font-size:0.78rem;color:var(--ink3);margin-top:1px}
+    .analysis-card-body{font-size:0.84rem;color:var(--ink2);line-height:1.65}
+    .analysis-card-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:0.75rem}
+    .abadge{padding:3px 9px;border-radius:6px;font-size:0.72rem;font-weight:600}
+    .ab-pass{background:#d1fae5;color:#065f46}.ab-warn{background:#fef3c7;color:#92400e}.ab-fail{background:#fee2e2;color:#991b1b}
+    .regions-section{}
+    .regions-layout{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;margin-top:3rem}
+    @media(max-width:720px){.regions-layout{grid-template-columns:1fr;gap:2rem}}
+    .region-list{list-style:none}
+    .region-item{display:flex;align-items:flex-start;gap:14px;padding:1rem 0;border-bottom:1px solid var(--border)}
+    .region-item:last-child{border-bottom:none}
+    .region-swatch{width:14px;height:14px;border-radius:4px;flex-shrink:0;margin-top:4px}
+    .region-name{font-weight:700;font-size:0.9rem;color:var(--ink)}
+    .region-pct{font-size:0.78rem;color:var(--blue);font-weight:600;margin-left:6px;font-family:'JetBrains Mono',monospace}
+    .region-desc{font-size:0.82rem;color:var(--ink2);margin-top:2px;line-height:1.5}
+    .mini-plot{background:white;border:1px solid var(--border);border-radius:16px;padding:1.5rem;box-shadow:var(--shadow)}
+    .download-section{background:linear-gradient(135deg,#0d1117 0%,#1a2540 50%,#0d2040 100%);position:relative;overflow:hidden}
+    .download-section::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 20% 50%,rgba(45,107,228,0.15) 0%,transparent 50%),radial-gradient(circle at 80% 30%,rgba(26,155,138,0.12) 0%,transparent 50%)}
+    .download-inner{max-width:700px;margin:0 auto;text-align:center;position:relative}
+    .download-inner .section-label{color:#6b9fe4}
+    .download-inner .section-title{color:white}
+    .download-inner .section-body{color:#8899aa;margin:0 auto 2.5rem}
+    .download-badges{display:flex;justify-content:center;gap:1rem;margin-top:2rem;flex-wrap:wrap}
+    .badge-item{display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#8899aa;font-weight:500}
+    .badge-item span{color:#6b9fe4;font-size:1rem}
+    .faq-section{background:var(--paper)}
+    .faq-list{margin-top:2.5rem;max-width:740px}
+    .faq-item{border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;background:white;transition:box-shadow 0.2s}
+    .faq-item:hover{box-shadow:var(--shadow)}
+    .faq-q{width:100%;padding:1.1rem 1.4rem;background:none;border:none;text-align:left;font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:600;color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .faq-chevron{font-size:0.8rem;color:var(--ink3);transition:transform 0.25s;flex-shrink:0}
+    .faq-item.open .faq-chevron{transform:rotate(180deg)}
+    .faq-a{max-height:0;overflow:hidden;transition:max-height 0.3s ease,padding 0.3s;font-size:0.875rem;color:var(--ink2);line-height:1.75;padding:0 1.4rem}
+    .faq-item.open .faq-a{max-height:300px;padding:0 1.4rem 1.1rem}
+    footer{background:var(--ink);padding:3rem 1.5rem}
+    .footer-inner{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.5rem}
+    .footer-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .footer-logo-text{font-family:'DM Serif Display',serif;font-size:1.1rem;color:white}
+    .footer-links{display:flex;gap:1.5rem;list-style:none;flex-wrap:wrap}
+    .footer-links a{text-decoration:none;font-size:0.85rem;color:#8899aa;transition:color 0.2s}
+    .footer-links a:hover{color:white}
+    .footer-copy{font-size:0.8rem;color:#55667a}
+    .reveal{opacity:0;transform:translateY(28px);transition:opacity 0.65s ease,transform 0.65s ease}
+    .reveal.visible{opacity:1;transform:none}
+    .citation-box{background:var(--blue-light);border:1px solid var(--blue-mid);border-radius:10px;padding:1rem 1.25rem;margin-top:1.5rem;font-size:0.82rem;color:var(--ink2);line-height:1.6}
+    .citation-box strong{color:var(--blue)}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">
+    <div style="display:flex;align-items:center">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="34" height="34" style="display:block;flex-shrink:0"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2d6be4"/><stop offset="100%" stop-color="#1a9b8a"/></linearGradient><linearGradient id="ls" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(255,255,255,0.18)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></linearGradient><clipPath id="lc"><rect width="120" height="120" rx="26"/></clipPath></defs><rect width="120" height="120" rx="26" fill="url(#lg)"/><rect width="120" height="60" rx="26" fill="url(#ls)" clip-path="url(#lc)"/><rect x="14" y="16" width="92" height="88" rx="6" fill="rgba(0,0,0,0.18)"/><line x1="24" y1="94" x2="97" y2="94" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" stroke-linecap="round"/><line x1="24" y1="94" x2="24" y2="24" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" stroke-linecap="round"/><polygon points="97,91 100,94 97,97" fill="rgba(255,255,255,0.5)"/><polygon points="21,24 24,21 27,24" fill="rgba(255,255,255,0.5)"/><ellipse cx="42" cy="52" rx="11" ry="13" fill="rgba(255,255,255,0.12)"/><ellipse cx="40" cy="78" rx="9" ry="7" fill="rgba(255,255,255,0.10)"/><rect x="34" y="42" width="4" height="4" rx="0.8" fill="white" opacity="0.92"/><rect x="40" y="37" width="4" height="4" rx="0.8" fill="white" opacity="0.92"/><rect x="47" y="44" width="4" height="4" rx="0.8" fill="white" opacity="0.90"/><rect x="36" y="50" width="4" height="4" rx="0.8" fill="white" opacity="0.88"/><rect x="44" y="49" width="4" height="4" rx="0.8" fill="white" opacity="0.85"/><rect x="39" y="56" width="4" height="4" rx="0.8" fill="white" opacity="0.82"/><rect x="33" y="72" width="4" height="4" rx="0.8" fill="white" opacity="0.88"/><rect x="39" y="76" width="4" height="4" rx="0.8" fill="white" opacity="0.85"/><rect x="45" y="73" width="4" height="4" rx="0.8" fill="white" opacity="0.82"/><rect x="36" y="80" width="4" height="4" rx="0.8" fill="white" opacity="0.80"/><line x1="64" y1="46" x2="68" y2="50" stroke="rgba(255,255,255,0.6)" stroke-width="1.4" stroke-linecap="round"/><line x1="68" y1="46" x2="64" y2="50" stroke="rgba(255,255,255,0.6)" stroke-width="1.4" stroke-linecap="round"/><rect x="75" y="30" width="5" height="5" rx="1" fill="#fbbf24"/><rect x="83" y="55" width="4.5" height="4.5" rx="0.8" fill="#fbbf24" opacity="0.85"/><rect x="68" y="82" width="4" height="4" rx="0.8" fill="#fbbf24" opacity="0.75"/><text x="100" y="98" font-family="Georgia,serif" font-size="8.5" font-style="italic" fill="rgba(255,255,255,0.65)">φ</text><text x="16" y="22" font-family="Georgia,serif" font-size="8.5" font-style="italic" fill="rgba(255,255,255,0.65)">ψ</text></svg>
+    </div>
+    <span class="nav-logo-text" style="margin-left:10px">RamaPlot</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#science">Science</a></li>
+    <li><a href="#analyses">Analyses</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="https://github.com/jobinjobzz/RamaPlot/releases/latest" target="_blank" class="nav-cta">&#x2B07; Download Free</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-badge"><div class="hero-badge-dot"></div>FREE DESKTOP SOFTWARE &middot; WORKS OFFLINE &middot; WINDOWS</div>
+  <h1>Protein Structure<br/><em>Validation,</em> Simplified</h1>
+  <p class="hero-sub">Generate publication-quality Ramachandran plots and run five PROCHECK-style validation analyses &mdash; ERRAT, bond geometry, clash score, B-factors &mdash; from any PDB structure. Entirely offline.</p>
+  <div class="hero-actions">
+    <a href="https://github.com/jobinjobzz/RamaPlot/releases/latest" target="_blank" class="btn-primary">&#x2B07; Download RamaPlot.exe</a>
+    <a href="#science" class="btn-secondary">&#x1F52C; Learn the science</a>
+  </div>
+  <div class="hero-mockup">
+    <div class="mockup-browser">
+      <div class="mockup-bar">
+        <div class="mockup-dot"></div><div class="mockup-dot"></div><div class="mockup-dot"></div>
+        <div class="mockup-url">localhost:7432 &mdash; RamaPlot</div>
+      </div>
+      <div class="mockup-content">
+        <div class="plot-preview">
+          <svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <rect width="700" height="420" fill="#f9fafb" rx="4"/>
+            <rect x="60" y="20" width="480" height="360" fill="white" stroke="#e4e8ef" stroke-width="1"/>
+            <path d="M100,50 L200,50 L220,80 L220,180 L180,220 L100,220 Z" fill="#e8eaf0" opacity="0.9"/>
+            <path d="M100,250 L200,250 L220,280 L200,380 L100,380 Z" fill="#e8eaf0" opacity="0.9"/>
+            <path d="M110,60 L190,60 L205,90 L205,170 L170,205 L110,205 Z" fill="#b8cef8" opacity="0.85"/>
+            <path d="M112,262 L188,262 L202,285 L188,368 L112,368 Z" fill="#b8cef8" opacity="0.85"/>
+            <path d="M125,75 L175,75 L188,100 L188,155 L155,188 L125,188 Z" fill="#5a92c7" opacity="0.9"/>
+            <path d="M127,275 L173,275 L185,295 L173,355 L127,355 Z" fill="#5a92c7" opacity="0.9"/>
+            <rect x="390" y="220" width="80" height="80" fill="#e8eaf0" opacity="0.9" rx="4"/>
+            <rect x="400" y="230" width="60" height="60" fill="#b8cef8" opacity="0.85" rx="3"/>
+            <rect x="410" y="240" width="40" height="40" fill="#5a92c7" opacity="0.9" rx="2"/>
+            <line x1="300" y1="20" x2="300" y2="380" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="4,4"/>
+            <line x1="60" y1="200" x2="540" y2="200" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="4,4"/>
+            <g fill="#111" opacity="0.75">
+              <rect x="137" y="92" width="5" height="5"/><rect x="148" y="85" width="5" height="5"/><rect x="155" y="98" width="5" height="5"/>
+              <rect x="143" y="105" width="5" height="5"/><rect x="162" y="88" width="5" height="5"/><rect x="130" y="115" width="5" height="5"/>
+              <rect x="170" y="95" width="5" height="5"/><rect x="158" y="112" width="5" height="5"/><rect x="145" y="125" width="5" height="5"/>
+              <rect x="133" y="285" width="5" height="5"/><rect x="145" y="292" width="5" height="5"/><rect x="155" y="280" width="5" height="5"/>
+              <rect x="142" y="310" width="5" height="5"/><rect x="162" y="298" width="5" height="5"/>
+            </g>
+            <g stroke="#444" stroke-width="1.5" opacity="0.8">
+              <line x1="415" y1="248" x2="423" y2="256"/><line x1="423" y1="248" x2="415" y2="256"/>
+              <line x1="428" y1="258" x2="436" y2="266"/><line x1="436" y1="258" x2="428" y2="266"/>
+            </g>
+            <g fill="#e07000" opacity="0.95">
+              <rect x="358" y="58" width="7" height="7"/><rect x="490" y="92" width="7" height="7"/><rect x="350" y="355" width="7" height="7"/>
+            </g>
+            <g><rect x="368" y="44" width="58" height="16" rx="3" fill="white" stroke="#cc0000" stroke-width="0.8"/><text x="397" y="55" font-family="monospace" font-size="8" fill="#bb0000" font-weight="bold" text-anchor="middle">A184 ASP</text><line x1="362" y1="62" x2="368" y2="58" stroke="#cc0000" stroke-width="0.7"/></g>
+            <line x1="60" y1="380" x2="540" y2="380" stroke="#555" stroke-width="1.2"/>
+            <line x1="60" y1="20" x2="60" y2="380" stroke="#555" stroke-width="1.2"/>
+            <text x="300" y="408" font-family="DM Sans,sans-serif" font-size="12" fill="#333" font-weight="600" text-anchor="middle">Phi (degrees)</text>
+            <text x="22" y="200" font-family="DM Sans,sans-serif" font-size="12" fill="#333" font-weight="600" text-anchor="middle" transform="rotate(-90,22,200)">Psi (degrees)</text>
+            <text x="153" y="138" font-family="Georgia,serif" font-size="22" fill="#1a3a5c" opacity="0.25" font-style="italic" font-weight="bold">A</text>
+            <text x="148" y="320" font-family="Georgia,serif" font-size="22" fill="#1a3a5c" opacity="0.25" font-style="italic" font-weight="bold">B</text>
+            <text x="420" y="268" font-family="Georgia,serif" font-size="18" fill="#1a3a5c" opacity="0.25" font-style="italic" font-weight="bold">L</text>
+            <rect x="560" y="30" width="128" height="175" rx="8" fill="white" stroke="#e4e8ef" stroke-width="1"/>
+            <text x="572" y="48" font-family="DM Sans,sans-serif" font-size="8.5" fill="#3d4a5c" font-weight="700">Residue Types</text>
+            <rect x="572" y="56" width="10" height="10" rx="2" fill="#5a92c7"/><text x="586" y="65" font-size="8" fill="#555">Most favoured</text>
+            <rect x="572" y="72" width="10" height="10" rx="2" fill="#b8cef8"/><text x="586" y="81" font-size="8" fill="#555">Additional allowed</text>
+            <rect x="572" y="88" width="10" height="10" rx="2" fill="#e8eaf0" stroke="#ccc" stroke-width="0.5"/><text x="586" y="97" font-size="8" fill="#555">Generously allowed</text>
+            <rect x="572" y="104" width="8" height="8" fill="#111"/><text x="586" y="112" font-size="8" fill="#555">General (267)</text>
+            <line x1="572" y1="124" x2="580" y2="132" stroke="#444" stroke-width="1.5"/><line x1="580" y1="124" x2="572" y2="132" stroke="#444" stroke-width="1.5"/>
+            <text x="586" y="131" font-size="8" fill="#555">Glycine (20)</text>
+            <polygon points="576,148 572,156 580,156" fill="#333"/><text x="586" y="155" font-size="8" fill="#555">Proline (10)</text>
+            <rect x="572" y="162" width="8" height="8" fill="#e07000"/><text x="586" y="170" font-size="8" fill="#555">Outliers (4)</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div><div class="stat-num">5</div><div class="stat-desc">Validation Analyses</div></div>
+    <div><div class="stat-num">100<span>%</span></div><div class="stat-desc">Offline Capable</div></div>
+    <div><div class="stat-num">PNG<span> SVG PDF</span></div><div class="stat-desc">Export Formats</div></div>
+    <div><div class="stat-num">0</div><div class="stat-desc">Setup Required</div></div>
+  </div>
+</div>
+
+<section id="science" class="science-section">
+  <div class="section-inner">
+    <span class="section-label reveal">The Science</span>
+    <h2 class="section-title reveal">What is a Ramachandran Plot?</h2>
+    <div class="science-grid">
+      <div class="science-text reveal">
+        <h3>Background &amp; History</h3>
+        <p>The Ramachandran plot was introduced by G.N. Ramachandran, C. Ramakrishnan, and V. Sasisekharan in 1963. It maps the backbone dihedral angles &phi; (phi) and &psi; (psi) of each amino acid residue in a protein, revealing which conformations are sterically allowed.</p>
+        <p>&phi; is the dihedral angle around the N&ndash;C&alpha; bond, and &psi; is around the C&alpha;&ndash;C bond. Because of steric clashes between atoms, only certain (&phi;, &psi;) combinations are energetically favourable &mdash; these define the known secondary structures: &alpha;-helices cluster near (&minus;63&deg;, &minus;43&deg;), &beta;-sheets near (&minus;120&deg;, +130&deg;), and left-handed helices near (+60&deg;, +40&deg;).</p>
+        <p>A well-refined structure at 2.0 &Aring; resolution should have over 90% of residues in the most favoured regions. It remains one of the primary tools for validating crystal structures deposited in the Protein Data Bank (PDB).</p>
+        <div class="cite">Ramachandran G.N., Ramakrishnan C., Sasisekharan V. (1963). <em>Stereochemistry of polypeptide chain configurations.</em> J. Mol. Biol. 7, 95&ndash;99.</div>
+      </div>
+      <div class="science-text reveal">
+        <h3>Region Definitions</h3>
+        <p>RamaPlot uses density-based region boundaries calibrated to match PROCHECK/MolProbity statistics from the Top500 high-resolution crystal structure dataset (Lovell et al. 2003):</p>
+        <ul style="margin:0.75rem 0 0.75rem 1.25rem;font-size:0.875rem;color:var(--ink2);line-height:1.9">
+          <li><strong>Most favoured (A, B, L, p)</strong> &mdash; core &alpha;-helix, &beta;-sheet, left-handed helix, and polyproline II (~22% of &phi;/&psi; space)</li>
+          <li><strong>Additional allowed (a, b, l, p)</strong> &mdash; sterically acceptable loop conformations (~15%)</li>
+          <li><strong>Generously allowed (~a, ~b, ~l, ~p)</strong> &mdash; borderline conformations (~10%)</li>
+          <li><strong>Disallowed</strong> &mdash; sterically unfavourable &mdash; flags potential modelling errors</li>
+        </ul>
+        <p>Glycine is plotted separately because its lack of a side chain gives it much greater conformational freedom. Proline and pre-proline residues are also treated separately due to their constrained &phi; angle (~&minus;60&deg;).</p>
+        <div class="cite">Lovell S.C. et al. (2003). <em>Structure validation by C&alpha; geometry: &phi;,&psi; and C&beta; deviation.</em> Proteins 50, 437&ndash;450.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="analyses" class="analyses-section">
+  <div class="section-inner">
+    <span class="section-label reveal">Analysis Suite</span>
+    <h2 class="section-title reveal">PROCHECK-Style Validation<br/>in Five Analyses</h2>
+    <p class="section-body reveal">RamaPlot runs the same battery of checks used by the SAVES v6 server &mdash; all locally, with no data upload required.</p>
+    <div class="analyses-grid">
+      <div class="analysis-card reveal">
+        <div class="analysis-card-header">
+          <div class="analysis-num an-blue">&phi;&psi;</div>
+          <div><div class="analysis-card-title">Ramachandran Plot</div><div class="analysis-card-sub">PROCHECK &middot; All Ramachandrans</div></div>
+        </div>
+        <div class="analysis-card-body">Maps backbone torsion angles &phi; and &psi; for every residue. Five separate sub-plots cover General, Glycine, Proline, Pre-Proline and &beta;-Branched (Val/Ile/Thr) residue classes. Each sub-plot reports percentage in favoured, allowed, generously allowed, and disallowed regions with a PROCHECK-calibrated statistics table.</div>
+        <div class="analysis-card-badges"><span class="abadge ab-pass">Pass &ge;90% favoured</span><span class="abadge ab-warn">Warning &ge;80%</span><span class="abadge ab-fail">Fail &lt;80%</span></div>
+      </div>
+      <div class="analysis-card reveal">
+        <div class="analysis-card-header">
+          <div class="analysis-num an-teal">&chi;1&chi;2</div>
+          <div><div class="analysis-card-title">Chi1-Chi2 Plot</div><div class="analysis-card-sub">Side-chain torsion analysis</div></div>
+        </div>
+        <div class="analysis-card-body">Plots the &chi;1 vs &chi;2 side-chain torsion angles for all residues with rotatable side chains (Arg, Asn, Asp, Cys, Gln, Glu, His, Ile, Leu, Lys, Met, Phe, Ser, Thr, Trp, Tyr, Val). Points cluster at the three preferred rotamers: gauche&sup1; (&minus;60&deg;), trans (180&deg;), gauche&sup2; (+60&deg;). Also reports omega (&omega;) angle planarity &mdash; trans peptide bonds should be near &plusmn;180&deg;.</div>
+        <div class="analysis-card-badges"><span class="abadge ab-pass">Pass &ge;90% in wells</span><span class="abadge ab-warn">Warning &ge;75%</span></div>
+      </div>
+      <div class="analysis-card reveal">
+        <div class="analysis-card-header">
+          <div class="analysis-num an-amber">ER</div>
+          <div><div class="analysis-card-title">ERRAT</div><div class="analysis-card-sub">Non-bonded interaction statistics</div></div>
+        </div>
+        <div class="analysis-card-body">Analyses statistics of non-bonded interactions between different atom types (C-C, C-N, C-O, N-N, N-O, O-O) in a 9-residue sliding window. Compares observed interaction frequencies against reference values from highly refined structures (Colovos &amp; Yeates 1993). Residues above the 95% confidence threshold are flagged as warnings; above 99% as errors.</div>
+        <div class="analysis-card-badges"><span class="abadge ab-pass">Pass &ge;95% quality</span><span class="abadge ab-warn">Warning &ge;85%</span><span class="abadge ab-fail">Fail &lt;85%</span></div>
+      </div>
+      <div class="analysis-card reveal">
+        <div class="analysis-card-header">
+          <div class="analysis-num an-purple">BG</div>
+          <div><div class="analysis-card-title">Bond Geometry</div><div class="analysis-card-sub">Engh &amp; Huber ideal values</div></div>
+        </div>
+        <div class="analysis-card-body">Compares observed main-chain bond lengths (N&ndash;C&alpha;, C&alpha;&ndash;C, C&ndash;O, C&ndash;N, C&alpha;&ndash;C&beta;) and bond angles (N&ndash;C&alpha;&ndash;C, C&alpha;&ndash;C&ndash;N, C&ndash;N&ndash;C&alpha;, etc.) against ideal values from the small-molecule crystal structure database (Engh &amp; Huber 1991). Deviations are expressed as Z-scores. RMSD values summarise overall geometry quality.</div>
+        <div class="analysis-card-badges"><span class="abadge ab-pass">Green |Z| &le; 2&sigma;</span><span class="abadge ab-warn">Yellow 2&ndash;4&sigma;</span><span class="abadge ab-fail">Red &gt; 4&sigma;</span></div>
+      </div>
+      <div class="analysis-card reveal">
+        <div class="analysis-card-header">
+          <div class="analysis-num an-rose">CS</div>
+          <div><div class="analysis-card-title">Clash Score &amp; B-factors</div><div class="analysis-card-sub">Steric clashes &middot; Atomic displacement</div></div>
+        </div>
+        <div class="analysis-card-body">The clash score counts serious steric overlaps (&gt;0.4 &Aring;) between non-bonded, non-adjacent atoms, reported per 1000 atoms (MolProbity convention). A score &lt;20 is considered good. B-factors (temperature factors) represent atomic displacement &mdash; very high values (&gt;80 &Aring;&sup2;) may indicate poorly defined regions requiring further refinement.</div>
+        <div class="analysis-card-badges"><span class="abadge ab-pass">Clash &lt;20 good</span><span class="abadge ab-warn">20&ndash;40 warning</span><span class="abadge ab-fail">&gt;40 poor</span></div>
+      </div>
+      <div class="analysis-card reveal" style="border-color:var(--blue-mid);background:var(--blue-light)">
+        <div class="analysis-card-header">
+          <div class="analysis-num an-blue">&#x21BB;</div>
+          <div><div class="analysis-card-title">Summary Dashboard</div><div class="analysis-card-sub">Pass &middot; Warning &middot; Fail</div></div>
+        </div>
+        <div class="analysis-card-body">All five analyses are summarised in a single dashboard with colour-coded Pass/Warning/Fail badges &mdash; the same convention as SAVES v6 and PROCHECK. Each card is clickable, jumping to the relevant analysis tab. Results can be exported as a comprehensive PDF report including all plots, statistics tables, and a full outlier residue list.</div>
+        <div class="analysis-card-badges"><span class="abadge ab-pass">PDF export</span><span class="abadge ab-pass">PNG 600 DPI</span><span class="abadge ab-pass">SVG vector</span></div>
+      </div>
+    </div>
+    <div class="citation-box reveal" style="margin-top:2rem"><strong>Key references:</strong> Laskowski R.A. et al. (1993) PROCHECK. <em>J. Appl. Cryst.</em> 26, 283&ndash;291 &middot; Colovos C. &amp; Yeates T.O. (1993) ERRAT. <em>Protein Sci.</em> 2, 1511&ndash;1519 &middot; Engh R.A. &amp; Huber R. (1991) Bond geometry. <em>Acta Cryst. A</em> 47, 392&ndash;400 &middot; Chen V.B. et al. (2010) MolProbity. <em>Acta Cryst. D</em> 66, 12&ndash;21</div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="section-inner">
+    <span class="section-label reveal">How It Works</span>
+    <h2 class="section-title reveal">From PDB to Publication<br/>in Three Steps</h2>
+    <p class="section-body reveal">No command line. No Python environment. No internet required. Just download, run, and validate.</p>
+    <div class="how-grid">
+      <div class="how-card reveal">
+        <div class="how-num">1</div><div class="how-icon">&#x1F50D;</div>
+        <div class="how-title">Input Your Structure</div>
+        <div class="how-desc">Enter any RCSB PDB accession code (e.g. 1CRN, 4HHB, 6W4H) to fetch automatically, or drag and drop your own .pdb or .cif file &mdash; including AlphaFold predictions and homology models.</div>
+      </div>
+      <div class="how-card reveal">
+        <div class="how-num">2</div><div class="how-icon">&#x2699;&#xFE0F;</div>
+        <div class="how-title">Automatic Validation</div>
+        <div class="how-desc">BioPython extracts all &phi;/&psi; torsion angles, side-chain &chi; angles, bond lengths and angles. Five PROCHECK-style analyses run simultaneously and results appear in a tabbed dashboard within seconds.</div>
+      </div>
+      <div class="how-card reveal">
+        <div class="how-num">3</div><div class="how-icon">&#x1F4CA;</div>
+        <div class="how-title">Export Your Results</div>
+        <div class="how-desc">Download plots as PNG (up to 1200 DPI) or SVG for publication, or generate a complete PDF report with all plots, PROCHECK-style statistics tables, and a full outlier residue list.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="features-section">
+  <div class="section-inner">
+    <span class="section-label reveal">Features</span>
+    <h2 class="section-title reveal">Everything You Need<br/>for Structure Validation</h2>
+    <div class="features-grid">
+      <div class="feature-card reveal"><div class="feature-icon fi-blue">&#x1F310;</div><div class="feature-title">RCSB PDB Fetch</div><div class="feature-desc">Type any 4-character PDB ID and the structure downloads automatically from RCSB. Supports both PDB and mmCIF formats.</div></div>
+      <div class="feature-card reveal"><div class="feature-icon fi-teal">&#x1F4C1;</div><div class="feature-title">PDB &amp; mmCIF Upload</div><div class="feature-desc">Drag and drop local .pdb or .cif files. Works with structures from AlphaFold, Rosetta, MODELLER, PHENIX, or any crystallographic refinement software.</div></div>
+      <div class="feature-card reveal"><div class="feature-icon fi-amber">&#x1F5FA;&#xFE0F;</div><div class="feature-title">PROCHECK Regions</div><div class="feature-desc">Region boundaries calibrated to match PROCHECK using density-based statistics from the Top500 high-resolution dataset. Covers all four region classes.</div></div>
+      <div class="feature-card reveal"><div class="feature-icon fi-purple">&#x1F4C4;</div><div class="feature-title">PDF Report</div><div class="feature-desc">Complete PDF containing all plots, PROCHECK-style statistics tables, outlier residue list, and clash table &mdash; ready for supplementary materials.</div></div>
+      <div class="feature-card reveal"><div class="feature-icon fi-rose">&#x26A0;&#xFE0F;</div><div class="feature-title">Smart Outlier Labeling</div><div class="feature-desc">The most structurally significant outliers are automatically labeled with collision-free placement, showing chain ID, residue number, and residue name.</div></div>
+      <div class="feature-card reveal"><div class="feature-icon fi-green">&#x1F4BB;</div><div class="feature-title">100% Offline</div><div class="feature-desc">Single .exe file &mdash; no installation, no Python runtime, no internet required for file upload mode. Your structural data never leaves your machine.</div></div>
+      <div class="feature-card reveal"><div class="feature-icon fi-indigo">&#x1F5BC;&#xFE0F;</div><div class="feature-title">High-Resolution Export</div><div class="feature-desc">Export at 150, 300, 600, 900 or 1200 DPI PNG for publication-quality figures. SVG exports are infinitely scalable vector graphics suitable for any journal format.</div></div>
+      <div class="feature-card reveal"><div class="feature-icon fi-orange">&#x1F52C;</div><div class="feature-title">Five Validation Analyses</div><div class="feature-desc">Ramachandran, Chi1-Chi2, ERRAT, Bond Geometry (Engh &amp; Huber), Clash Score, and B-factor distribution &mdash; the same analyses as the SAVES v6 server.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="regions">
+  <div class="section-inner">
+    <div class="regions-layout">
+      <div>
+        <span class="section-label reveal">Understanding the Plot</span>
+        <h2 class="section-title reveal">What the Regions Mean</h2>
+        <p class="section-body reveal" style="margin-bottom:1.5rem">Each point on a Ramachandran plot represents one amino acid residue. Its position reveals the backbone conformation and whether it is sterically favourable. Glycine, Proline, and &beta;-branched residues are plotted separately.</p>
+        <ul class="region-list reveal">
+          <li class="region-item"><div class="region-swatch" style="background:#5a92c7"></div><div><div class="region-name">Most Favoured Regions <span class="region-pct">&gt;90% expected</span></div><div class="region-desc">Core &alpha;-helix (A, &phi;&asymp;&minus;63&deg;, &psi;&asymp;&minus;43&deg;), &beta;-sheet (B, &phi;&asymp;&minus;120&deg;, &psi;&asymp;+130&deg;), left-handed helix (L, &phi;&asymp;+60&deg;, &psi;&asymp;+40&deg;), and polyproline II. A well-refined structure at &ge;2.0 &Aring; should have &gt;90% of non-Gly, non-Pro residues here.</div></div></li>
+          <li class="region-item"><div class="region-swatch" style="background:#b8cef8"></div><div><div class="region-name">Additional Allowed <span class="region-pct">a, b, l, p</span></div><div class="region-desc">Sterically acceptable conformations outside the core regions. Common in loop regions, turns, and irregular secondary structures. No structural error implied.</div></div></li>
+          <li class="region-item"><div class="region-swatch" style="background:#e8eaf0;border:1px solid #ccc"></div><div><div class="region-name">Generously Allowed <span class="region-pct">~a, ~b, ~l, ~p</span></div><div class="region-desc">Borderline conformations. Residues here warrant closer inspection in the model, especially if corroborated by unusual B-factors or ERRAT warnings nearby.</div></div></li>
+          <li class="region-item"><div class="region-swatch" style="background:#e07000"></div><div><div class="region-name">Disallowed Regions <span class="region-pct">Outliers</span></div><div class="region-desc">Sterically unfavourable. May indicate modelling errors, active-site residues under strain, crystal packing artefacts, or residues requiring further refinement. Always investigate in the context of electron density maps.</div></div></li>
+        </ul>
+      </div>
+      <div class="mini-plot reveal">
+        <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+          <rect width="300" height="300" fill="#f9fafb"/>
+          <rect x="30" y="10" width="240" height="240" fill="white" stroke="#e4e8ef"/>
+          <path d="M50,30 L120,30 L130,55 L130,120 L100,140 L50,140 Z" fill="#e8eaf0" opacity="0.9"/>
+          <path d="M50,155 L115,155 L125,175 L115,235 L50,235 Z" fill="#e8eaf0" opacity="0.9"/>
+          <path d="M58,38 L112,38 L120,60 L120,112 L92,130 L58,130 Z" fill="#b8cef8" opacity="0.9"/>
+          <path d="M58,162 L108,162 L118,178 L108,228 L58,228 Z" fill="#b8cef8" opacity="0.9"/>
+          <path d="M68,48 L102,48 L108,68 L108,102 L82,118 L68,118 Z" fill="#5a92c7" opacity="0.9"/>
+          <path d="M68,170 L100,170 L108,184 L100,220 L68,220 Z" fill="#5a92c7" opacity="0.9"/>
+          <rect x="190" y="110" width="50" height="50" fill="#e8eaf0" rx="3"/>
+          <rect x="196" y="116" width="38" height="38" fill="#b8cef8" rx="2"/>
+          <rect x="202" y="122" width="26" height="26" fill="#5a92c7" rx="2"/>
+          <line x1="150" y1="10" x2="150" y2="250" stroke="#ddd" stroke-width="0.8" stroke-dasharray="3,3"/>
+          <line x1="30" y1="130" x2="270" y2="130" stroke="#ddd" stroke-width="0.8" stroke-dasharray="3,3"/>
+          <g fill="#111" opacity="0.75"><rect x="76" y="62" width="4" height="4"/><rect x="85" y="56" width="4" height="4"/><rect x="90" y="72" width="4" height="4"/><rect x="79" y="82" width="4" height="4"/><rect x="95" y="65" width="4" height="4"/><rect x="74" y="178" width="4" height="4"/><rect x="85" y="185" width="4" height="4"/><rect x="92" y="172" width="4" height="4"/><rect x="80" y="198" width="4" height="4"/></g>
+          <rect x="168" y="40" width="6" height="6" fill="#e07000"/>
+          <rect x="240" y="70" width="6" height="6" fill="#e07000"/>
+          <rect x="220" y="210" width="6" height="6" fill="#e07000"/>
+          <text x="84" y="92" font-family="Georgia,serif" font-size="14" fill="#1a3a5c" opacity="0.22" font-style="italic" font-weight="bold">A</text>
+          <text x="80" y="200" font-family="Georgia,serif" font-size="14" fill="#1a3a5c" opacity="0.22" font-style="italic" font-weight="bold">B</text>
+          <text x="208" y="145" font-family="Georgia,serif" font-size="12" fill="#1a3a5c" opacity="0.22" font-style="italic" font-weight="bold">L</text>
+          <line x1="30" y1="250" x2="270" y2="250" stroke="#555" stroke-width="1"/>
+          <line x1="30" y1="10" x2="30" y2="250" stroke="#555" stroke-width="1"/>
+          <text x="150" y="268" font-size="9" fill="#555" text-anchor="middle" font-weight="600">Phi (&phi;)</text>
+          <text x="12" y="130" font-size="9" fill="#555" text-anchor="middle" font-weight="600" transform="rotate(-90,12,130)">Psi (&psi;)</text>
+        </svg>
+        <p style="text-align:center;font-size:0.75rem;color:var(--ink3);margin-top:0.75rem;font-weight:500">PROCHECK-calibrated region classification</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="download" class="download-section">
+  <div class="download-inner section-inner">
+    <span class="section-label reveal">Free Download</span>
+    <h2 class="section-title reveal">Start Validating<br/>Your Structures Today</h2>
+    <p class="section-body reveal">RamaPlot is completely free. One executable file &mdash; no Python, no installation, no dependencies. Just double-click and run.</p>
+    <div class="hero-actions reveal" style="justify-content:center">
+      <a href="https://github.com/jobinjobzz/RamaPlot/releases/latest" target="_blank" class="btn-primary">&#x2B07; Download RamaPlot.exe</a>
+      <a href="https://github.com/jobinjobzz/RamaPlot" target="_blank" class="btn-secondary" style="color:#e2e8f0;border-color:#3a4a62;background:rgba(255,255,255,0.08)">&#x2B50; View on GitHub</a>
+    </div>
+    <div class="download-badges reveal">
+      <div class="badge-item"><span>&#x1FA9F;</span> Windows 10 / 11</div>
+      <div class="badge-item"><span>&#x26A1;</span> No installation needed</div>
+      <div class="badge-item"><span>&#x1F512;</span> 100% offline capable</div>
+      <div class="badge-item"><span>&#x1F193;</span> Completely free</div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="faq-section">
+  <div class="section-inner">
+    <span class="section-label reveal">FAQ</span>
+    <h2 class="section-title reveal">Common Questions</h2>
+    <div class="faq-list reveal">
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">What is a Ramachandran plot?<span class="faq-chevron">&#x25BC;</span></button><div class="faq-a">A Ramachandran plot maps the backbone torsion angles &phi; (phi, around N&ndash;C&alpha;) and &psi; (psi, around C&alpha;&ndash;C) for each residue in a protein structure. Introduced by G.N. Ramachandran in 1963, it is used to assess stereochemical quality &mdash; well-refined structures have over 90% of non-Gly, non-Pro residues in the most favoured regions.</div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">What analyses does RamaPlot perform?<span class="faq-chevron">&#x25BC;</span></button><div class="faq-a">RamaPlot runs five PROCHECK-style analyses: (1) Ramachandran plot with 5 residue-class sub-plots, (2) Chi1-Chi2 side-chain torsion plot with omega angle statistics, (3) ERRAT non-bonded interaction analysis, (4) Bond length and angle Z-scores vs Engh &amp; Huber ideal values, and (5) Clash score and B-factor distribution. All results include Pass/Warning/Fail badges and are exportable as PDF.</div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">How do RamaPlot results compare to SAVES/PROCHECK?<span class="faq-chevron">&#x25BC;</span></button><div class="faq-a">RamaPlot uses density-based region boundaries calibrated to match PROCHECK's published coverage statistics (~22% most favoured, ~15% additional allowed, ~10% generously allowed). Results should agree closely with SAVES v6 PROCHECK output. Minor differences may arise from how end-residues and chain breaks are handled.</div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Do I need Python or any other software installed?<span class="faq-chevron">&#x25BC;</span></button><div class="faq-a">No. RamaPlot is a self-contained Windows .exe. Python, BioPython, Matplotlib, SciPy and all other dependencies are bundled inside. Just download and double-click &mdash; it opens automatically in your default browser at localhost:7432.</div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Can I use it without an internet connection?<span class="faq-chevron">&#x25BC;</span></button><div class="faq-a">Yes, fully. File upload mode (.pdb, .cif) works entirely offline. The PDB ID lookup requires a brief internet connection to fetch the structure from RCSB, after which all analysis runs locally. Your structural data never leaves your machine.</div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">What file formats are supported?<span class="faq-chevron">&#x25BC;</span></button><div class="faq-a">RamaPlot supports standard PDB format (.pdb, .ent) and mmCIF format (.cif), plus any 4-character RCSB accession code. AlphaFold predictions, Rosetta models, MODELLER outputs, and PHENIX-refined structures all work as long as they are in PDB or CIF format.</div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">How are outliers defined?<span class="faq-chevron">&#x25BC;</span></button><div class="faq-a">Outliers are residues whose &phi;/&psi; angles fall outside the generously allowed regions as defined by calibrated PROCHECK boundaries (based on the Top500 high-resolution dataset). Only non-glycine, non-proline residues are classified as outliers, as glycine has wider conformational freedom and proline has a fixed &phi; angle.</div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">What does the ERRAT score mean?<span class="faq-chevron">&#x25BC;</span></button><div class="faq-a">The ERRAT overall quality score is the percentage of residues below the 95% confidence error threshold. Scores above 95% indicate a well-validated structure; 85&ndash;95% is acceptable; below 85% suggests regions that may benefit from further refinement. Individual residues above the 99% threshold particularly warrant re-examination.</div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <a class="footer-logo" href="#">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="28" height="28" style="display:block;flex-shrink:0"><defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2d6be4"/><stop offset="100%" stop-color="#1a9b8a"/></linearGradient></defs><rect width="120" height="120" rx="26" fill="url(#lg2)"/><rect x="14" y="16" width="92" height="88" rx="6" fill="rgba(0,0,0,0.18)"/><line x1="24" y1="94" x2="97" y2="94" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" stroke-linecap="round"/><line x1="24" y1="94" x2="24" y2="24" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" stroke-linecap="round"/><rect x="34" y="42" width="4" height="4" rx="0.8" fill="white" opacity="0.92"/><rect x="42" y="37" width="4" height="4" rx="0.8" fill="white" opacity="0.9"/><rect x="36" y="75" width="4" height="4" rx="0.8" fill="white" opacity="0.85"/><rect x="75" y="30" width="5" height="5" rx="1" fill="#fbbf24"/></svg>
+      <span class="footer-logo-text" style="margin-left:10px">RamaPlot</span>
+    </a>
+    <ul class="footer-links">
+      <li><a href="#science">Science</a></li>
+      <li><a href="#analyses">Analyses</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#download">Download</a></li>
+      <li><a href="https://github.com/jobinjobzz/RamaPlot" target="_blank">GitHub</a></li>
+    </ul>
+    <span class="footer-copy">&copy; 2026 RamaPlot &middot; Built with BioPython + Matplotlib &middot; Free &amp; Open Source</span>
+  </div>
+</footer>
+
+<script>
+  function toggleFaq(btn) {
+    var item = btn.closest('.faq-item');
+    var isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(function(i){ i.classList.remove('open'); });
+    if (!isOpen) item.classList.add('open');
+  }
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) {
+        var siblings = Array.from(e.target.parentElement.querySelectorAll('.reveal'));
+        var idx = siblings.indexOf(e.target);
+        setTimeout(function(){ e.target.classList.add('visible'); }, idx * 80);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(function(el){ observer.observe(el); });
+  var sections = document.querySelectorAll('section[id]');
+  window.addEventListener('scroll', function() {
+    var current = '';
+    sections.forEach(function(s){ if (window.scrollY >= s.offsetTop - 80) current = s.id; });
+    document.querySelectorAll('.nav-links a').forEach(function(a){
+      a.style.color = a.getAttribute('href') === '#' + current ? 'var(--blue)' : '';
+    });
+  });
+</script>
+</body>
+</html>
